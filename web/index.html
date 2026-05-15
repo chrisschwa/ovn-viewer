@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVN Troubleshooter</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>🔍 OVN Troubleshooter</h1>
+                <div id="connection-status" class="status-indicator disconnected">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Disconnected</span>
+                </div>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </li>
+                <li class="nav-item" data-page="routers">
+                    <span class="nav-icon">🔀</span>
+                    <span>Routers</span>
+                </li>
+                <li class="nav-item" data-page="switches">
+                    <span class="nav-icon">🔌</span>
+                    <span>Switches</span>
+                </li>
+                <li class="nav-item" data-page="ports">
+                    <span class="nav-icon">🔗</span>
+                    <span>Ports</span>
+                </li>
+                <li class="nav-item" data-page="acls">
+                    <span class="nav-icon">🛡️</span>
+                    <span>ACLs</span>
+                </li>
+                <li class="nav-item" data-page="chassis">
+                    <span class="nav-icon">🖥️</span>
+                    <span>Chassis</span>
+                </li>
+                <li class="nav-item" data-page="flows">
+                    <span class="nav-icon">📡</span>
+                    <span>Flows</span>
+                </li>
+                <li class="nav-divider"></li>
+                <li class="nav-item" data-page="tracer">
+                    <span class="nav-icon">🎯</span>
+                    <span>Packet Tracer</span>
+                </li>
+                <li class="nav-item" data-page="topology">
+                    <span class="nav-icon">🗺️</span>
+                    <span>Topology</span>
+                </li>
+                <li class="nav-item" data-page="ovs">
+                    <span class="nav-icon">⚙️</span>
+                    <span>OVS</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Breadcrumb Navigation -->
+            <div id="breadcrumb-bar" class="breadcrumb-bar" style="display:none"></div>
+            <!-- Dashboard Page -->
+            <div class="page active" id="page-dashboard">
+                <div class="page-header">
+                    <h2>Dashboard</h2>
+                    <button class="btn btn-refresh" onclick="loadDashboard()">🔄 Refresh</button>
+                </div>
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🔀</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-routers">-</span>
+                            <span class="stat-label">Logical Routers</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔌</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-switches">-</span>
+                            <span class="stat-label">Logical Switches</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔗</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-ports">-</span>
+                            <span class="stat-label">Ports</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🛡️</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-acls">-</span>
+                            <span class="stat-label">ACLs</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🖥️</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-chassis">-</span>
+                            <span class="stat-label">Chassis</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔄</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-nat">-</span>
+                            <span class="stat-label">NAT Rules</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🛤️</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-routes">-</span>
+                            <span class="stat-label">Static Routes</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚖️</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="stat-lb">-</span>
+                            <span class="stat-label">Load Balancers</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="connection-info-card">
+                    <h3>Connection Info</h3>
+                    <div id="connection-details" class="connection-details">
+                        <p>Connecting...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Routers Page -->
+            <div class="page" id="page-routers">
+                <div class="page-header">
+                    <h2>Logical Routers</h2>
+                    <button class="btn btn-refresh" onclick="loadRouters()">🔄 Refresh</button>
+                </div>
+                <div class="entity-list" id="routers-list"></div>
+                <div class="entity-detail" id="router-detail" style="display:none;">
+                    <div class="detail-header">
+                        <button class="btn btn-back" onclick="closeDetail('router')">← Back</button>
+                        <h3 id="router-detail-title">Router Details</h3>
+                    </div>
+                    <div class="detail-tabs">
+                        <button class="tab-btn active" data-tab="router-overview">Overview</button>
+                        <button class="tab-btn" data-tab="router-routes">Static Routes</button>
+                        <button class="tab-btn" data-tab="router-nat">NAT Rules</button>
+                        <button class="tab-btn" data-tab="router-flows">Flows</button>
+                    </div>
+                    <div class="tab-content active" id="tab-router-overview"></div>
+                    <div class="tab-content" id="tab-router-routes"></div>
+                    <div class="tab-content" id="tab-router-nat"></div>
+                    <div class="tab-content" id="tab-router-flows"></div>
+                </div>
+            </div>
+
+            <!-- Switches Page -->
+            <div class="page" id="page-switches">
+                <div class="page-header">
+                    <h2>Logical Switches</h2>
+                    <button class="btn btn-refresh" onclick="loadSwitches()">🔄 Refresh</button>
+                </div>
+                <div class="entity-list" id="switches-list"></div>
+                <div class="entity-detail" id="switch-detail" style="display:none;">
+                    <div class="detail-header">
+                        <button class="btn btn-back" onclick="closeDetail('switch')">← Back</button>
+                        <h3 id="switch-detail-title">Switch Details</h3>
+                    </div>
+                    <div class="detail-tabs">
+                        <button class="tab-btn active" data-tab="switch-overview">Overview</button>
+                        <button class="tab-btn" data-tab="switch-acls">ACLs</button>
+                        <button class="tab-btn" data-tab="switch-flows">Flows</button>
+                    </div>
+                    <div class="tab-content active" id="tab-switch-overview"></div>
+                    <div class="tab-content" id="tab-switch-acls"></div>
+                    <div class="tab-content" id="tab-switch-flows"></div>
+                </div>
+            </div>
+
+            <!-- Ports Page -->
+            <div class="page" id="page-ports">
+                <div class="page-header">
+                    <h2>Ports</h2>
+                    <button class="btn btn-refresh" onclick="loadPorts()">🔄 Refresh</button>
+                </div>
+                <div id="ports-list-container">
+                    <div class="tabs-container">
+                        <button class="tab-btn active" onclick="loadRouterPorts()">Router Ports</button>
+                        <button class="tab-btn" onclick="loadSwitchPorts()">Switch Ports</button>
+                    </div>
+                    <div class="entity-list" id="ports-list"></div>
+                </div>
+                <div class="entity-detail" id="port-detail" style="display:none;">
+                    <div class="detail-header">
+                        <button class="btn btn-back" onclick="closePortDetail()">← Back</button>
+                        <h3 id="port-detail-title">Port Details</h3>
+                    </div>
+                    <div class="detail-tabs">
+                        <button class="tab-btn active" data-tab="port-overview">Overview</button>
+                        <button class="tab-btn" data-tab="port-related">Related</button>
+                    </div>
+                    <div class="tab-content active" id="tab-port-overview"></div>
+                    <div class="tab-content" id="tab-port-related"></div>
+                </div>
+            </div>
+
+            <!-- ACLs Page -->
+            <div class="page" id="page-acls">
+                <div class="page-header">
+                    <h2>Access Control Lists</h2>
+                    <button class="btn btn-refresh" onclick="loadACLs()">🔄 Refresh</button>
+                </div>
+                <div class="filter-bar">
+                    <select id="acl-direction-filter" onchange="loadACLs()">
+                        <option value="">All Directions</option>
+                        <option value="from-lport">from-lport</option>
+                        <option value="to-lport">to-lport</option>
+                        <option value="to-lport-delimited">to-lport-delimited</option>
+                    </select>
+                    <select id="acl-action-filter" onchange="loadACLs()">
+                        <option value="">All Actions</option>
+                        <option value="allow">allow</option>
+                        <option value="allow-related">allow-related</option>
+                        <option value="deny">deny</option>
+                        <option value="deny-related">deny-related</option>
+                        <option value="accept">accept</option>
+                        <option value="drop">drop</option>
+                        <option value="reject">reject</option>
+                    </select>
+                    <input type="text" id="acl-search" placeholder="Search match expression..." oninput="loadACLs()">
+                </div>
+                <div class="entity-list" id="acls-list"></div>
+            </div>
+
+            <!-- Chassis Page -->
+            <div class="page" id="page-chassis">
+                <div class="page-header">
+                    <h2>Chassis</h2>
+                    <button class="btn btn-refresh" onclick="loadChassis()">🔄 Refresh</button>
+                </div>
+                <div class="entity-list" id="chassis-list"></div>
+                <div class="entity-detail" id="chassis-detail" style="display:none;">
+                    <div class="detail-header">
+                        <button class="btn btn-back" onclick="closeChassisDetail()">← Back</button>
+                        <h3 id="chassis-detail-title">Chassis Details</h3>
+                    </div>
+                    <div class="detail-tabs">
+                        <button class="tab-btn active" data-tab="chassis-overview">Overview</button>
+                        <button class="tab-btn" data-tab="chassis-hosted">Hosted Resources</button>
+                        <button class="tab-btn" data-tab="chassis-ports">Port Bindings</button>
+                    </div>
+                    <div class="tab-content active" id="tab-chassis-overview"></div>
+                    <div class="tab-content" id="tab-chassis-hosted"></div>
+                    <div class="tab-content" id="tab-chassis-ports"></div>
+                </div>
+            </div>
+
+            <!-- Flows Page -->
+            <div class="page" id="page-flows">
+                <div class="page-header">
+                    <h2>Logical Flows</h2>
+                    <button class="btn btn-refresh" onclick="loadFlows()">🔄 Refresh</button>
+                </div>
+                <div class="filter-bar">
+                    <select id="flow-type-filter" onchange="loadFlows()">
+                        <option value="">All Types</option>
+                        <option value="logical">logical</option>
+                        <option value="chassis">chassis</option>
+                        <option value="lsp">lsp</option>
+                        <option value="lr">lr</option>
+                    </select>
+                    <input type="text" id="flow-search" placeholder="Search flows..." oninput="loadFlows()">
+                </div>
+                <div class="entity-list" id="flows-list"></div>
+            </div>
+
+            <!-- Packet Tracer Page -->
+            <div class="page" id="page-tracer">
+                <div class="page-header">
+                    <h2>🎯 Packet Tracer</h2>
+                </div>
+                <div class="tracer-container">
+                    <div class="tracer-form">
+                        <div class="form-group">
+                            <label>Trace Mode</label>
+                            <select id="trace-mode" onchange="toggleTraceMode()">
+                                <option value="router">Router → Switch Port</option>
+                                <option value="switch">Switch → Switch Port</option>
+                            </select>
+                        </div>
+                        <div class="trace-router-fields" id="trace-router-fields">
+                            <div class="form-group">
+                                <label>Logical Router</label>
+                                <select id="trace-router"></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Logical Router Port</label>
+                                <select id="trace-lrp"></select>
+                            </div>
+                        </div>
+                        <div class="trace-switch-fields" id="trace-switch-fields" style="display:none;">
+                            <div class="form-group">
+                                <label>Logical Switch</label>
+                                <select id="trace-switch"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Logical Switch Port (Destination)</label>
+                            <select id="trace-lsp"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Packet Specification</label>
+                            <div class="packet-builder">
+                                <select id="pkt-protocol">
+                                    <option value="ip4">IPv4</option>
+                                    <option value="ip6">IPv6</option>
+                                    <option value="arp">ARP</option>
+                                </select>
+                                <input type="text" id="pkt-src-ip" placeholder="Src IP (e.g. 10.0.0.10)">
+                                <input type="text" id="pkt-dst-ip" placeholder="Dst IP (e.g. 10.0.1.20)">
+                                <select id="pkt-l4-protocol">
+                                    <option value="">No L4</option>
+                                    <option value="tcp">TCP</option>
+                                    <option value="udp">UDP</option>
+                                    <option value="icmp">ICMP</option>
+                                </select>
+                                <input type="number" id="pkt-src-port" placeholder="Src Port" style="width:80px;">
+                                <input type="number" id="pkt-dst-port" placeholder="Dst Port" style="width:80px;">
+                            </div>
+                            <small class="form-hint">Or enter a custom packet spec: <code>ip4.src==10.0.0.10 && ip4.dst==10.0.1.20 && tcp.src==80</code></small>
+                            <textarea id="pkt-custom" placeholder="Custom packet specification..." rows="2"></textarea>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <label>
+                                <input type="checkbox" id="trace-rod" checked>
+                                Include Radius of Darkness check
+                            </label>
+                        </div>
+                        <button class="btn btn-primary btn-trace" onclick="runTrace()">▶ Run Trace</button>
+                    </div>
+                    <div class="tracer-result" id="trace-result">
+                        <div class="result-placeholder">
+                            <p>Configure a packet trace and click "Run Trace" to see results</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topology Page -->
+            <div class="page" id="page-topology">
+                <div class="page-header">
+                    <h2>Topology</h2>
+                    <button class="btn btn-refresh" onclick="loadTopology()">🔄 Refresh</button>
+                </div>
+                <div class="topology-container">
+                    <div class="topology-view" id="topology-view">
+                        <pre id="topology-output">Click "Refresh" to load topology...</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OVS Page -->
+            <div class="page" id="page-ovs">
+                <div class="page-header">
+                    <h2>OVS Configuration</h2>
+                    <button class="btn btn-refresh" onclick="loadOVS()">🔄 Refresh</button>
+                </div>
+                <div class="tabs-container">
+                    <button class="tab-btn active" data-tab="ovs-show">OVS Show</button>
+                    <button class="tab-btn" data-tab="ovs-bridges">Bridges</button>
+                    <button class="tab-btn" data-tab="ovs-interfaces">Interfaces</button>
+                </div>
+                <div class="tab-content active" id="tab-ovs-show"></div>
+                <div class="tab-content" id="tab-ovs-bridges"></div>
+                <div class="tab-content" id="tab-ovs-interfaces"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading-overlay" style="display:none;">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <script src="/assets/js/app.js"></script>
+</body>
+</html>
