@@ -5,11 +5,11 @@ A web-based application for network administrators to troubleshoot traffic flows
 ## Features
 
 - **Dashboard**: Overview of your OVN environment with entity counts and connection status
-- **Logical Routers**: Browse routers, inspect static routes, NAT rules, and flows
-- **Logical Switches**: Browse switches, inspect ACLs and flows
-- **Ports**: View router ports and switch ports with their configurations
+- **Logical Routers**: Browse routers, inspect static routes, NAT rules, and flows (drill-down on each router)
+- **Logical Switches**: Browse switches, inspect ACLs and flows (drill-down on each switch)
+- **Ports**: View router ports and switch ports with their configurations, drill-down into individual port details
 - **ACLs**: Browse and filter Access Control Lists by direction, action, and match expression
-- **Chassis**: View connected OVN chassis (hypervisors)
+- **Chassis**: View connected OVN chassis (hypervisors) with drill-down to hosted resources (routers via `lrp-set-chassis`, switches via port bindings)
 - **Logical Flows**: Browse and filter the OVN pipeline flows
 - **Packet Tracer**: Interactive packet trace tool wrapping `ovn-trace` with:
   - Visual packet specification builder (IPv4/IPv6/ARP, TCP/UDP/ICMP)
@@ -127,6 +127,19 @@ OVN_CONTROLLER_HOST=my-controller.ovn-controller OVN_SSH_KEY_PATH=~/.ssh/mykey .
 ```
 
 Then open `http://localhost:8080` in your browser.
+
+## Running in Mock Mode (No OVN Required)
+
+When `MOCK_OVN=1` is set, the troubleshooter runs entirely offline using a built-in mock executor that simulates OVN/OVS commands. This is useful for testing, demos, or development without an OVN environment.
+
+```bash
+# Run with built-in mock data
+$env:MOCK_OVN="1"; .\ovn-troubleshooter.exe
+```
+
+The mock mode includes the same predefined scenarios as [ovn-mock](../ovn-mock) (default, demo, broken-routing, acl-drop, nat-issue). The `MOCK_OVN_SCENARIO` environment variable selects which scenario to use.
+
+For more advanced mock testing (e.g., remote SSH-based testing), pair with the [ovn-mock](../ovn-mock) SSH server.
 
 ## API Endpoints
 
