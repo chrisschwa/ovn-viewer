@@ -112,7 +112,10 @@ func (e *Executor) ExecuteWithContext(ctx context.Context, cmd string) (string, 
 	session.Stdout = &stdout
 	session.Stderr = &stderr
 
-	err = session.Run(cmd)
+	// Wrap command with docker/podman exec if docker mode is enabled
+	wrappedCmd := e.wrapWithDockerExec(cmd)
+
+	err = session.Run(wrappedCmd)
 	if err != nil {
 		errMsg := stderr.String()
 		if errMsg == "" {
@@ -122,6 +125,60 @@ func (e *Executor) ExecuteWithContext(ctx context.Context, cmd string) (string, 
 	}
 
 	return strings.TrimSpace(stdout.String()), nil
+}
+
+// wrapWithDockerExec wraps a command with docker/podman exec if docker mode is enabled
+func (e *Executor) wrapWithDockerExec(cmd string) string {
+	if !e.config.DockerMode {
+		return cmd
+	}
+	
+	runtime := e.config.DockerRuntime
+	if runtime == "" {
+		runtime = "docker"
+	}
+	
+	// Determine which container to use based on the command
+	container := e.resolveContainer(cmd)
+	if container == "" {
+		// No container mapping found, run without wrapping
+		return cmd
+	}
+	
+	return fmt.Sprintf("%s exec %s %s", runtime, container, cmd)
+}
+
+// resolveContainer determines which container a command should run in
+func (e *Executor) resolveContainer(cmd string) string {
+	// Extract the base command (first word, handling paths)
+	parts := strings.Fields(cmd)
+	if len(parts) == 0 {
+		return ""
+	}
+	base := parts[0]
+	// Strip path if present
+	if idx := strings.LastIndex(base, "/"); idx != -1 {
+		base = base[idx+1:]
+	}
+	
+	// Check user-defined mapping first
+	if e.config.DockerContainerMap != nil {
+		if c, ok := e.config.DockerContainerMap[base]; ok {
+			return c
+		}
+	}
+	
+	// Default container mapping for common OVN/OVS commands
+	switch base {
+	case "ovn-nbctl", "ovn-trace":
+		return "ovn-northd"
+	case "ovn-sbctl":
+		return "ovn-southbound"
+	case "ovs-vsctl", "ovs-ofctl":
+		return "ovn-controller"
+	default:
+		return ""
+	}
 }
 
 // ===== OVN-NBCTL COMMANDS =====

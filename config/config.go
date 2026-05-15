@@ -27,6 +27,17 @@ type OVNConfig struct {
 	
 	// Timeout for OVN commands in seconds
 	CommandTimeout int `json:"command_timeout"`
+	
+	// Docker execution mode: when true, wraps OVN/OVS commands with docker/podman exec
+	// e.g., "docker exec ovn-northd ovn-nbctl list Logical_router"
+	// When enabled, commands are mapped to containers:
+	//   ovn-nbctl, ovn-trace → ovn-northd container
+	//   ovn-sbctl             → ovn-southbound container
+	//   ovs-vsctl, ovs-ofctl  → ovn-controller container
+	// Container names are taken from DockerContainerMap (defaults shown above).
+	DockerMode          bool   `json:"docker_mode"`
+	DockerRuntime       string `json:"docker_runtime"` // "docker" or "podman" (default: "docker")
+	DockerContainerMap  map[string]string `json:"docker_container_map"` // command → container name
 }
 
 // OpenStackConfig holds the OpenStack API configuration

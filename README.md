@@ -90,7 +90,18 @@ Edit `config.json` with your environment settings:
     "controller_user": "ovnadmin",
     "ssh_port": 22,
     "ssh_key_path": "~/.ssh/id_rsa",
-    "command_timeout": 30
+    "command_timeout": 30,
+
+    // Docker mode: wrap commands with docker/podman exec
+    "docker_mode": true,
+    "docker_runtime": "docker",
+    "docker_container_map": {
+      "ovn-nbctl": "ovn-northd",
+      "ovn-sbctl": "ovn-southbound",
+      "ovn-trace": "ovn-northd",
+      "ovs-vsctl": "ovn-controller",
+      "ovs-ofctl": "ovn-controller"
+    }
   }
 }
 ```
@@ -127,6 +138,39 @@ OVN_CONTROLLER_HOST=my-controller.ovn-controller OVN_SSH_KEY_PATH=~/.ssh/mykey .
 ```
 
 Then open `http://localhost:8080` in your browser.
+
+## Running in Docker Mode (Containerized OVN)
+
+In environments where OVN/OVS services run inside containers (e.g., TripleO, Kolla, podified deployments), enable docker mode to wrap commands with `docker exec` or `podman exec`:
+
+```json
+{
+  "ovn": {
+    "docker_mode": true,
+    "docker_runtime": "docker",
+    "docker_container_map": {
+      "ovn-nbctl": "ovn-northd",
+      "ovn-sbctl": "ovn-southbound",
+      "ovn-trace": "ovn-northd",
+      "ovs-vsctl": "ovn-controller",
+      "ovs-ofctl": "ovn-controller"
+    }
+  }
+}
+```
+
+When enabled, commands like `ovn-nbctl list Logical_router` are automatically wrapped:
+- `ovn-nbctl` → `docker exec ovn-northd ovn-nbctl list Logical_router`
+- `ovn-sbctl` → `docker exec ovn-southbound ovn-sbctl ...`
+- `ovs-vsctl` → `docker exec ovn-controller ovs-vsctl ...`
+
+Default container mappings (when `docker_container_map` is not set):
+
+| Command | Default Container |
+|---|---|
+| `ovn-nbctl`, `ovn-trace` | `ovn-northd` |
+| `ovn-sbctl` | `ovn-southbound` |
+| `ovs-vsctl`, `ovs-ofctl` | `ovn-controller` |
 
 ## Running in Mock Mode (No OVN Required)
 
