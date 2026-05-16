@@ -153,6 +153,9 @@ func main() {
 		api.GET("/autocomplete/switches", h.GetSwitchNames)
 		api.GET("/autocomplete/ports", h.GetPortNames)
 
+		// IP Overview
+		api.GET("/ips", h.GetIPOverview)
+
 		// WebSocket
 		api.GET("/ws", h.WebSocket)
 	}

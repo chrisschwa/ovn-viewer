@@ -566,6 +566,44 @@ func (h *Handler) RadiusOfDarkness(c *gin.Context) {
 	})
 }
 
+// ===== IP OVERVIEW ENDPOINT =====
+
+// GetIPOverview returns an overview of all IPs: NAT (floating), router port networks, switch port IPs
+func (h *Handler) GetIPOverview(c *gin.Context) {
+	var natRules, routerPorts, switchPorts []map[string]interface{}
+	var wg sync.WaitGroup
+
+	wg.Add(3)
+	go func() {
+		defer wg.Done()
+		output, err := h.executor.ListNATRules()
+		if err == nil {
+			natRules, _ = ovn.ParseJSONOutput(output)
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		output, err := h.executor.ListLogicalRouterPorts()
+		if err == nil {
+			routerPorts, _ = ovn.ParseJSONOutput(output)
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		output, err := h.executor.ListLogicalSwitchPorts()
+		if err == nil {
+			switchPorts, _ = ovn.ParseJSONOutput(output)
+		}
+	}()
+	wg.Wait()
+
+	c.JSON(http.StatusOK, gin.H{
+		"nat_rules":     natRules,
+		"router_ports":  routerPorts,
+		"switch_ports":  switchPorts,
+	})
+}
+
 // ===== AUTOCOMPLETE ENDPOINTS =====
 
 // GetRouterNames returns all router names for autocomplete

@@ -236,6 +236,9 @@ function navigateTo(page) {
             case 'acls':
                 loadACLs();
                 break;
+            case 'ips':
+                loadIPs();
+                break;
             case 'chassis':
                 loadChassis();
                 break;
@@ -749,6 +752,94 @@ async function loadACLs() {
 }
 
 // ===== CHASSIS =====
+
+let ipData = null;
+
+async function loadIPs() {
+    try {
+        const res = await fetch('/api/ips');
+        ipData = await res.json();
+        loadIPSection('nat');
+    } catch (err) {
+        document.getElementById('ips-list').innerHTML = `<div class="error">Failed to load IPs: ${err.message}</div>`;
+    }
+}
+
+function loadIPSection(section) {
+    // Update tab buttons
+    const container = document.querySelector('#page-ips .tabs-container');
+    if (container) {
+        container.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event && event.target && event.target.classList.add('active');
+    }
+
+    const list = document.getElementById('ips-list');
+    if (!ipData) {
+        list.innerHTML = '<p>Loading...</p>';
+        return;
+    }
+
+    let html = '';
+    if (section === 'nat') {
+        const items = ipData.nat_rules || [];
+        if (items.length === 0) {
+            html = '<p class="empty-state">No NAT rules found</p>';
+        } else {
+            html = '<table class="data-table"><thead><tr><th>Name</th><th>Type</th><th>External IP</th><th>Internal IP</th><th>Protocol</th><th>Logical IP</th></tr></thead><tbody>';
+            items.forEach(item => {
+                html += `<tr>
+                    <td>${item.name || '-'}</td>
+                    <td><span class="badge">${item.type || '-'}</span></td>
+                    <td class="mono">${item.external_ip || '-'}</td>
+                    <td class="mono">${item.internal_ip || item.logical_ip || '-'}</td>
+                    <td>${item.protocol || '-'}</td>
+                    <td class="mono">${item.logical_ip || '-'}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+        }
+    } else if (section === 'router') {
+        const items = ipData.router_ports || [];
+        if (items.length === 0) {
+            html = '<p class="empty-state">No router ports found</p>';
+        } else {
+            html = '<table class="data-table"><thead><tr><th>Port Name</th><th>IPs / Networks</th><th>MAC</th></tr></thead><tbody>';
+            items.forEach(item => {
+                const networks = item.networks && item.networks.length > 0
+                    ? item.networks.join(', ')
+                    : '-';
+                html += `<tr>
+                    <td>${item.name || '-'}</td>
+                    <td class="mono ip-highlight">${networks}</td>
+                    <td class="mono">${item.mac || '-'}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+        }
+    } else if (section === 'switch') {
+        const items = ipData.switch_ports || [];
+        // Filter to only show ports with IP addresses (not router/localnet ports)
+        const ipPorts = items.filter(item => item.addresses && item.addresses.length > 0 && item.type !== 'router' && item.type !== 'localnet');
+        if (ipPorts.length === 0) {
+            html = '<p class="empty-state">No switch ports with IPs found</p>';
+        } else {
+            html = '<table class="data-table"><thead><tr><th>Port Name</th><th>Type</th><th>IPs / Addresses</th><th>MAC</th></tr></thead><tbody>';
+            ipPorts.forEach(item => {
+                const addrs = item.addresses.join(', ');
+                const mac = addrs.split(' ')[0] || '-';
+                html += `<tr>
+                    <td>${item.name || '-'}</td>
+                    <td><span class="badge">${item.type || '-'}</span></td>
+                    <td class="mono ip-highlight">${addrs}</td>
+                    <td class="mono">${mac}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+        }
+    }
+
+    list.innerHTML = html;
+}
 
 async function loadChassis() {
     try {

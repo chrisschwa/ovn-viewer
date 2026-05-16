@@ -38,6 +38,10 @@
                     <span class="nav-icon">🛡️</span>
                     <span>ACLs</span>
                 </li>
+                <li class="nav-item" data-page="ips">
+                    <span class="nav-icon">🌐</span>
+                    <span>IPs</span>
+                </li>
                 <li class="nav-item" data-page="chassis">
                     <span class="nav-icon">🖥️</span>
                     <span>Chassis</span>
@@ -239,6 +243,20 @@
                     <input type="text" id="acl-search" placeholder="Search match expression..." oninput="loadACLs()">
                 </div>
                 <div class="entity-list" id="acls-list"></div>
+            </div>
+
+            <!-- IPs Page -->
+            <div class="page" id="page-ips">
+                <div class="page-header">
+                    <h2>IP Overview</h2>
+                    <button class="btn btn-refresh" onclick="loadIPs()">🔄 Refresh</button>
+                </div>
+                <div class="tabs-container">
+                    <button class="tab-btn active" onclick="loadIPSection('nat')">NAT (Floating IPs)</button>
+                    <button class="tab-btn" onclick="loadIPSection('router')">Router Port IPs</button>
+                    <button class="tab-btn" onclick="loadIPSection('switch')">Switch Port IPs</button>
+                </div>
+                <div class="entity-list" id="ips-list"></div>
             </div>
 
             <!-- Chassis Page -->
