@@ -7,9 +7,9 @@ import (
 	"strings"
 	"sync"
 
-	"ovn-troubleshooter/config"
-	"ovn-troubleshooter/models"
-	"ovn-troubleshooter/ovn"
+	"github.com/chrisschwa/ovn-viewer/config"
+	"github.com/chrisschwa/ovn-viewer/models"
+	"github.com/chrisschwa/ovn-viewer/ovn"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"

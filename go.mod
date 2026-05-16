@@ -1,4 +1,4 @@
-module ovn-troubleshooter
+module github.com/chrisschwa/ovn-viewer
 
 go 1.21
 
@@ -6,10 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/gorilla/websocket v1.5.1
 	golang.org/x/crypto v0.16.0
-	mock.ovn-mock v0.0.0
 )
-
-replace mock.ovn-mock => ../ovn-mock
 
 require (
 	github.com/bytedance/sonic v1.9.1 // indirect

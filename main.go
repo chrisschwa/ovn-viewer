@@ -9,9 +9,9 @@ import (
 	"os"
 	"strings"
 
-	"ovn-troubleshooter/config"
-	"ovn-troubleshooter/handlers"
-	"ovn-troubleshooter/ovn"
+	"github.com/chrisschwa/ovn-viewer/config"
+	"github.com/chrisschwa/ovn-viewer/handlers"
+	"github.com/chrisschwa/ovn-viewer/ovn"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,7 +32,7 @@ func main() {
 		defaultPaths := []string{
 			"config.json",
 			"./config/config.json",
-			"/etc/ovn-troubleshooter/config.json",
+			"/etc/ovn-viewer/config.json",
 		}
 		for _, path := range defaultPaths {
 			if err := loadConfig(path, &cfg); err == nil {

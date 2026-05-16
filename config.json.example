@@ -4,20 +4,21 @@
     "host": "0.0.0.0"
   },
   "ovn": {
-    "controller_host": "controller.openstack.local",
-    "controller_user": "ovnadmin",
+    "controller_host": "your-ovn-controller.example.com",
+    "controller_user": "ovs",
     "ssh_port": 22,
     "ssh_key_path": "~/.ssh/id_rsa",
     "nbdb_address": "",
     "sbdb_address": "",
-    "command_timeout": 30
-  },
-  "openstack": {
-    "auth_url": "http://controller.openstack.local:5000/v3",
-    "username": "",
-    "password": "",
-    "project_name": "",
-    "domain_name": "Default",
-    "region_name": "RegionOne"
+    "command_timeout": 30,
+    "docker_mode": false,
+    "docker_runtime": "docker",
+    "docker_container_map": {
+      "ovn-nbctl": "ovn-northd",
+      "ovn-sbctl": "ovn-southbound",
+      "ovn-trace": "ovn-northd",
+      "ovs-vsctl": "ovn-controller",
+      "ovs-ofctl": "ovn-controller"
+    }
   }
 }

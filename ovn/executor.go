@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"ovn-troubleshooter/config"
+	"github.com/chrisschwa/ovn-viewer/config"
 
 	"golang.org/x/crypto/ssh"
 )

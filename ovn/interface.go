@@ -2,7 +2,7 @@ package ovn
 
 import (
 	"context"
-	"ovn-troubleshooter/config"
+	"github.com/chrisschwa/ovn-viewer/config"
 )
 
 // ExecutorInterface defines the interface for executing OVN/OVS commands
