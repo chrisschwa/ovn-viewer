@@ -14,6 +14,7 @@ Browse logical routers, switches, ports, ACLs, and chassis — trace packets thr
 - **Logical Switches** — Browse switches, inspect ACLs and flows
 - **Ports** — View router ports and switch ports with their configurations
 - **ACLs** — Browse and filter Access Control Lists
+- **IPs** — Overview of all IP addresses: NAT floating IPs, router port IPs, switch port IPs
 - **Chassis** — View connected OVN chassis (hypervisors)
 - **Logical Flows** — Browse and filter the OVN pipeline flows
 - **Packet Tracer** — Interactive packet trace tool wrapping `ovn-trace`:
@@ -134,6 +135,32 @@ OVN_CONTROLLER_HOST=my-controller OVN_SSH_KEY_PATH=~/.ssh/mykey ./ovn-viewer
 
 Then open `http://localhost:8080` in your browser.
 
+## Mock Mode (No OVN Required)
+
+Set `MOCK_OVN=1` to run entirely offline using built-in mock data. This is useful for testing, demos, or development without an OVN environment:
+
+```bash
+# Linux / macOS
+MOCK_OVN=1 ./ovn-viewer
+
+# Windows PowerShell
+$env:MOCK_OVN="1"; .\ovn-viewer.exe
+```
+
+Optionally select a scenario with `MOCK_OVN_SCENARIO`:
+
+| Scenario | Description |
+|---|---|
+| `default` | Basic setup: 2 routers, 3 switches, ACLs, routes |
+| `demo` | Rich environment: 4 routers, 6 switches, LBs, complex ACLs |
+| `broken-routing` | Missing static routes causing packet drops |
+| `acl-drop` | ACLs blocking HTTP, SSH, and ICMP traffic |
+| `nat-issue` | Misconfigured NAT rules (wrong internal IP) |
+
+```bash
+MOCK_OVN=1 MOCK_OVN_SCENARIO=broken-routing ./ovn-viewer
+```
+
 ## Docker Mode
 
 In environments where OVN/OVS services run inside containers (e.g., TripleO, Kolla, podified deployments), enable docker mode:
@@ -205,6 +232,12 @@ When enabled, commands are automatically wrapped with `docker exec` or `podman e
 | GET | `/api/ovs/bridges` | List OVS bridges |
 | GET | `/api/ovs/interfaces` | List OVS interfaces |
 | GET | `/api/ovs/show` | OVS topology |
+
+### IP Overview
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/ips` | NAT rules, router port IPs, switch port IPs |
 
 ### Packet Tracing
 
